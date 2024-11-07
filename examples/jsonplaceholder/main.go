@@ -30,7 +30,11 @@ func main() {
 	}
 
 	placeholderClient := placeholder.NewClient(*baseURL, opts...)
-	response, err := placeholderClient.CreatePost(ctx, placeholder.CreatePostParams{})
+	response, err := placeholderClient.UpdatePost(ctx, 1, placeholder.UpdatePostParams{
+		UserID: 2,
+		Title:  "example title",
+		Body:   "example body",
+	})
 	if err != nil {
 		log.Panic(err)
 	}

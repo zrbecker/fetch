@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"net/url"
 )
 
 type FetcherOption func(*Fetcher) error
@@ -16,13 +17,13 @@ func Client(client *http.Client) FetcherOption {
 	}
 }
 
-type FetchOption func(*fetchOptions) error
+type FetchOption func(*FetchOptions) error
 
-type fetchOptions struct {
-	method  string
-	params  []Param
-	headers []Header
-	body    io.Reader
+type FetchOptions struct {
+	Method string
+	Params url.Values
+	Header http.Header
+	Body   io.Reader
 }
 
 type Param struct {
@@ -36,37 +37,52 @@ type Header struct {
 }
 
 func Method(method string) FetchOption {
-	return func(options *fetchOptions) error {
-		options.method = method
+	return func(options *FetchOptions) error {
+		options.Method = method
 		return nil
 	}
 }
 
 func Params(params ...Param) FetchOption {
-	return func(options *fetchOptions) error {
-		options.params = append(options.params, params...)
+	return func(options *FetchOptions) error {
+		for _, param := range params {
+			options.Params.Add(param.Key, param.Value)
+		}
 		return nil
 	}
 }
 
 func Headers(headers ...Header) FetchOption {
-	return func(options *fetchOptions) error {
-		options.headers = append(options.headers, headers...)
+	return func(options *FetchOptions) error {
+		if options.Header == nil {
+			options.Header = make(http.Header)
+		}
+		for _, header := range headers {
+			options.Header.Add(header.Key, header.Value)
+		}
 		return nil
 	}
 }
 
 func Body(body interface{}) FetchOption {
-	return func(options *fetchOptions) error {
+	return func(options *FetchOptions) error {
 		bodyReader, ok := body.(io.Reader)
 		if !ok {
+			if err := Headers(Header{
+				Key:   "Content-Type",
+				Value: "application/json; charset=UTF-8",
+			})(options); err != nil {
+				return err
+			}
+
 			jsonBz, err := json.Marshal(body)
 			if err != nil {
 				return err
 			}
+
 			bodyReader = io.NopCloser(bytes.NewReader(jsonBz))
 		}
-		options.body = bodyReader
+		options.Body = bodyReader
 		return nil
 	}
 }

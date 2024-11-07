@@ -55,7 +55,6 @@ func (c *Client) CreatePost(ctx context.Context, params CreatePostParams, opts .
 		[]fetch.FetchOption{
 			fetch.Method(http.MethodPost),
 			fetch.Body(params),
-			fetch.Headers(fetch.Header{Key: "Content-Type", Value: "application/json; charset=UTF-8"}),
 		},
 		opts...,
 	)
@@ -71,7 +70,6 @@ func (c *Client) UpdatePost(ctx context.Context, id int, params UpdatePostParams
 		[]fetch.FetchOption{
 			fetch.Method(http.MethodPut),
 			fetch.Body(params),
-			fetch.Headers(fetch.Header{Key: "Content-Type", Value: "application/json; charset=UTF-8"}),
 		},
 		opts...,
 	)
@@ -87,7 +85,6 @@ func (c *Client) PatchPost(ctx context.Context, id int, params PatchPostParams, 
 		[]fetch.FetchOption{
 			fetch.Method(http.MethodPatch),
 			fetch.Body(params),
-			fetch.Headers(fetch.Header{Key: "Content-Type", Value: "application/json; charset=UTF-8"}),
 		},
 		opts...,
 	)

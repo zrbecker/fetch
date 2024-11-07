@@ -22,8 +22,8 @@ func NewFetcher(baseURL string, opts ...FetcherOption) *Fetcher {
 }
 
 func (c *Fetcher) Fetch(ctx context.Context, path string, response interface{}, opts ...FetchOption) error {
-	var options = fetchOptions{
-		method: http.MethodGet,
+	var options = FetchOptions{
+		Method: http.MethodGet,
 	}
 
 	for _, opt := range opts {
@@ -37,20 +37,13 @@ func (c *Fetcher) Fetch(ctx context.Context, path string, response interface{}, 
 		return err
 	}
 
-	params := url.Values{}
-	for _, param := range options.params {
-		params.Add(param.Key, param.Value)
-	}
-	u.RawQuery = params.Encode()
+	u.RawQuery = options.Params.Encode()
 
-	req, err := http.NewRequestWithContext(ctx, options.method, u.String(), options.body)
+	req, err := http.NewRequestWithContext(ctx, options.Method, u.String(), options.Body)
 	if err != nil {
 		return err
 	}
-
-	for _, header := range options.headers {
-		req.Header.Add(header.Key, header.Value)
-	}
+	req.Header = options.Header
 
 	res, err := c.client.Do(req)
 	if err != nil {
